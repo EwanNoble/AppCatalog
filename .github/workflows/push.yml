@@ -19,8 +19,7 @@ jobs:
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
       - run: |
-          $Outputs = pulumi stack output -s dev -j | ConvertFrom-Json
-          (pulumi stack output -s dev -C infra -j | ConvertFrom-Json).PSObject.Properties | % { 
+          (pulumi stack output -s dev -j | ConvertFrom-Json).PSObject.Properties | % { 
             Write-Output "::set-output name=$($_.Name)::$($_.Value)" 
             "$($_.Name)=$($_.Value)" >> $env:GITHUB_ENV
           }
