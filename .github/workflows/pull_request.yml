@@ -29,12 +29,8 @@ jobs:
             dotnet list $_ package --deprecated | Tee-Object -Variable Deprecated
             $Errors = $Deprecated + $Vulnerable | Select-String '>'
             if ($Errors.Count -gt 0) {
-              Write-Host "##vso[task.logissue type=error]Package issues discovered, review output above"
-              $ErrorFound = $true
+              Write-Output "::error file=$($_)::Package issues found"
             }
-          }
-          if ($ErrorFound) {
-            exit 1
           }
         shell: pwsh
         working-directory: ./app
