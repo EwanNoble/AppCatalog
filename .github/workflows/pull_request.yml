@@ -21,3 +21,20 @@ jobs:
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      - run: |
+          dotnet publish ./web/AppCatalog.Web.csproj
+
+          Get-ChildItem -Filter *.csproj -Recurse | % {
+            dotnet list $_ package --vulnerable | Tee-Object -Variable Vulnerable
+            dotnet list $_ package --deprecated | Tee-Object -Variable Deprecated
+            $Errors = $Deprecated + $Vulnerable | Select-String '>'
+            if ($Errors.Count -gt 0) {
+              Write-Host "##vso[task.logissue type=error]Package issues discovered, review output above"
+              $ErrorFound = $true
+            }
+          }
+          if ($ErrorFound) {
+            exit 1
+          }
+        shell: pwsh
+        working-directory: ./app
